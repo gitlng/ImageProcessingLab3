@@ -18,19 +18,18 @@ def toGray(img):
                 img.itemset((x, y, i), avg)
     return img
 
-def median(image, kernel_radius=1):
-    result_image = copy(image)
-    width, height = image.shape[:2]
-    med_index = (2 * kernel_radius + 1) ** 2 // 2
-    for x in range(kernel_radius, width - kernel_radius):
-        for y in range(kernel_radius, height - kernel_radius):
-            submatrix = image[x - kernel_radius: x + kernel_radius +
-                              1, y - kernel_radius: y + kernel_radius + 1, :]
-            submatrix = submatrix.reshape(-1, 3)
-            submatrix = submatrix.tolist()
-            submatrix.sort(key=lambda v: v[0]*0.3 + v[1]*0.59 + v[2]*0.11)
-            result_image[x, y] = submatrix[med_index]
-    return result_image
+def gauss(img):
+    res_img = copy(img)
+    width, height = img.shape[:2]
+    kernel = np.array([[0.09272289, 0.11905855, 0.09272289], [0.11905855, 0.1528742 , 0.11905855], [0.09272289, 0.11905855, 0.09272289]])
+    for x in range(1, width-1):
+        for y in range(1, height-1):
+            color = 0
+            for i in range(-1, 2):
+                for j in range(-1, 2):
+                    color = color + img[x + i][y + j][0] * kernel[i + 1][j + 1]
+            res_img[x, y, :] = color
+    return res_img
 
 def sobel(img):
     res_img = copy(img)
@@ -98,9 +97,9 @@ def Canny(img):
     print('canny: toGray start')
     res_img = toGray(res_img)
     print('canny: toGray end')
-    print('canny: median start')
-    res_img = median(res_img)
-    print('canny: median end')
+    print('canny: gauss start')
+    res_img = gauss(res_img)
+    print('canny: gauss end')
     print('canny: sobel start')
     res_img, gradientMatrix = sobel(res_img)
     print('canny: sobel end')
